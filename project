@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+</head>
+<body>
+  <h2 id="welcome">Selamat datang di manajamen bisnis online!</h2>
+<h2 id="login"> login di manajemen bisnis online
+  <button onclick="logout()">Logout</button>
+
+  <script src="script.js"></script>
+  <script>
+    checkSession();
+  </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>afwanda rizqi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="profile-container">
+  <div class="header-bg"></div>
+
+  <div class="profile-photo-wrapper">
+    <img src="profile.png" alt="profile" class="profile-photo" />
+  </div>
+
+  <div class="header-text">
+    <h1>afwanda rizqi</h1>
+    <p class="subtitle">He/Him • Web Developer</p>
+    <p>Jakarta, Indonesia • <a href="https://"afwanda.rizqi.com">afwanda.rizqi.com</a></p>
+    <p><strong>afwanda rizqi</strong> — universitas ipwija</p>
+  </div>
+
+  <div class="action-buttons">
+
+
+    <button id="loginBtn">Login untuk akses data</button>
+<button id="logoutBtn">Logout</button>
+
+  </div>
+
+  <div id="content"></div>
+
+  <div class="content-card">
+    <h3>Sosial Media</h3>
+    <ul>
+      <li><strong>linkedin :</strong> http://linkedin.com/in/afwanda</li>
+      <li><strong>credly :</strong> https://www.credly.com/users/afwanda</li>
+    </ul>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const SUPABASE_URL = 'https://axdkczrtxnztgnwdsetj.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4ZGtjenJ0eG56dGdud2RzZXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1OTc4MDYsImV4cCI6MjA2MjE3MzgwNn0.8NzethwXofyC0bFXoH1FP1BaB7j8rk_v5WeBgkTzVcI'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const content = document.getElementById('content')
+
+// Coba login manual (bisa diganti pakai form)
+async function login() {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: 'user@example.com', // ganti dengan akun terdaftar
+    password: 'password123'     // ganti sesuai user
+  })
+
+  if (error) {
+    alert('Login gagal: ' + error.message)
+    return
+  }
+
+  loadData()
+}
+
+async function logout() {
+  await supabase.auth.signOut()
+  content.innerHTML = '<p>Logout berhasil.</p>'
+}
+
+// Load data hanya milik user yang login
+async function loadData() {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+
+    content.innerHTML = '<p>Silakan login untuk melihat data.</p>'
+    return
+  }
+
+
+
+
+  const { data, error } = await supabase
+    .from('web3')
+    .select('*')
+    .order('id')
+
+  if (error) {
+    alert('Error loading data: ' + error.message)
+    return
+  }
+
+  let out = ''
+  data.forEach(row => {
+    out += `
+      <div class="content-card">
+        <h2>${row.judul}</h2>
+        <p>${row.isi}</p>
+      </div>
+    `
+  })
+
+  content.innerHTML = out
+
+}
+
+
+document.getElementById('loginBtn').addEventListener('click', login)
+document.getElementById('logoutBtn').addEventListener('click', logout)
+
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) loadData()
+})
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Sederhana - LocalStorage</title>
+
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+  <h2>Login</h2>
+  <form id="loginForm">
+    <label>Username:
+      <input type="text" id="username" required>
+    </label>
+    <label>Password:
+      <input type="password" id="password" required>
+    </label>
+    <button type="submit">Login</button>
+  </form>
+</div>
+
+<div class="login-box" id="welcomeBox" style="display: none;">
+  <h2 id="welcome">Halo, User!</h2>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+  // Simulasi user login (hardcoded)
+  const users = {
+    admin: '12345',
+    user: 'pass'
+  };
+
+  // Cek apakah user sudah login
+  function checkLogin() {
+    const session = localStorage.getItem('sessionUser');
+    if (session) {
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('welcomeBox').style.display = 'block';
+      document.getElementById('welcome').innerText = `Halo, ${session}!`;
+    }
+  }
+
+  // Tangani login
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const uname = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+
+    if (users[uname] && users[uname] === pass) {
+      localStorage.setItem('sessionUser', uname);
+      checkLogin();
+    } else {
+      alert('Username atau password salah!');
+    }
+  });
+
+  // Logout
+  function logout() {
+    localStorage.removeItem('sessionUser');
+    location.reload();
+  }
+
+  // Jalankan saat pertama dimuat
+  checkLogin();
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>afwanda rizqi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="profile-container">
+  <div class="header-bg"></div>
+
+  <div class="profile-photo-wrapper">
+    <img src="profile.png" alt="profile" class="profile-photo" />
+  </div>
+
+  <div class="header-text">
+    <h1>afwanda rizqi</h1>
+    <p class="subtitle">He/Him • Web Developer</p>
+    <p>Jakarta, Indonesia • <a href="https://afwanda.rizqi.com">"afwanda.rizqi.com</a></p>
+    <p><strong>afwanda rizqi</strong> —afwanda rizqi net<etc/p>
+  </div>
+
+  <div class="action-buttons">
+
+
+    <button id="loginBtn">Login untuk akses data</button>
+<button id="logoutBtn">Logout</button>
+
+  </div>
+
+  <div id="content"></div>
+
+  <div class="content-card">
+    <h3>Sosial Media</h3>
+    <ul>
+      <li><strong>linkedin :</strong> http://linkedin.com/in/afwanda rizqi</li>
+      <li><strong>credly :</strong> https://www.credly.com/users/afwanda rizqi</li>
+    </ul>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const SUPABASE_URL = 'https://https://axdkczrtxnztgnwdsetj.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4ZGtjenJ0eG56dGdud2RzZXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1OTc4MDYsImV4cCI6MjA2MjE3MzgwNn0.8NzethwXofyC0bFXoH1FP1BaB7j8rk_v5WeBgkTzVcI'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const content = document.getElementById('content')
+const content = document.getElementById('database')
+
+// Coba login manual (bisa diganti pakai form)
+async function login() {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: 'user@example.com', // ganti dengan akun terdaftar
+    password: 'password123'     // ganti sesuai user
+  })
+
+  if (error) {
+    alert('Login gagal: ' + error.message)
+    return
+  }
+
+  loadData()
+}
+
+async function logout() {
+  await supabase.auth.signOut()
+  content.innerHTML = '<p>Logout berhasil.</p>'
+}
+
+// Load data hanya milik user yang login
+async function loadData() {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+
+    content.innerHTML = '<p>Silakan login untuk melihat data.</p>'
+    return
+  }
+
+
+
+
+  const { data, error } = await supabase
+    .from('web3')
+    .select('*')
+    .order('id')
+
+  if (error) {
+    alert('Error loading data: ' + error.message)
+    return
+  }
+
+  let out = ''
+  data.forEach(row => {
+    out += `
+      <div class="content-card">
+        <h2>${row.judul}</h2>
+        <p>${row.isi}</p>
+      </div>
+    `
+  })
+
+  content.innerHTML = out
+
+}
+
+
+document.getElementById('loginBtn').addEventListener('click', login)
+document.getElementById('logoutBtn').addEventListener('click', logout)
+
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) loadData()
+})
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+<body>
+  <h2>Login</h2>
+  <form id="loginForm">
+    <label>Username: <input type="text" id="username" required></label><br>
+    <label>Password: <input type="password" id="password" required></label><br>
+    <button type="submit">Login</button>
+  </form>
+
+  <script src="script.js"></script>
+</body>
+</html>
+// Simulasi user (hardcoded)
+const users = {
+  'admin': '12345',
+  'user': 'pass'
+};
+
+// Simpan cookie
+function setCookie(name, value, days) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${value}; path=/; expires=${expires}`;
+}
+
+// Ambil cookie
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+}
+
+// Hapus cookie
+function deleteCookie(name) {
+  document.cookie = name + '=; Max-Age=0; path=/;';
+}
+
+// Proses login
+if (document.getElementById('loginForm')) {
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const uname = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+
+    if (users[uname] && users[uname] === pass) {
+      const sessionData = { username: uname, loginTime: Date.now() };
+      sessionStorage.setItem('session', JSON.stringify(sessionData));
+      setCookie('session_user', uname, 1); // expire in 1 day
+
+      window.location.href = 'home.html';
+    } else {
+      alert('Username atau password salah!');
+    }
+  });
+}
+
+// Cek session di home
+function checkSession() {
+  const session = JSON.parse(sessionStorage.getItem('session'));
+  const cookieUser = getCookie('session_user');
+
+  if (session && cookieUser && session.username === cookieUser) {
+    document.getElementById('welcome manajemen bisnis').innerText = `Halo, ${cookieUser}!`;
+  } else {
+    alert('Session tidak ditemukan. Silakan login kembali.');
+    window.location.href = 'login.html';
+  }
+}
+
+// Logout
+function logout() {
+  sessionStorage.removeItem('session');
+  deleteCookie('session_user');
+  window.location.href = 'login.html';
+}
+"daftar manajemen bisnis"
+const bugs = javascript.web(sessionStorage.getItem('session'))
+
+<html>
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #1c1c1c;
+  background-color: #f3f2ef;
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+a {
+  color: #0a66c2;
+  text-decoration: none;
+}
+
+.profile-container {
+  max-width: 700px;
+  margin: 10px auto;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.header-bg {
+  height: 200px;
+  background-image: url('bg.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.profile-photo-wrapper {
+  position: absolute;
+  top: 130px;
+  left: 30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid white;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+}
+
+.profile-photo-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.header-text {
+  margin-top: 40px;
+  padding: 30px 30px 10px 30px;
+}
+
+.header-text h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.header-text .subtitle {
+  color: #666;
+  margin: 5px 0;
+}
+
+.header-text a {
+  color: #0073b1;
+  text-decoration: none;
+}
+
+.action-buttons {
+  padding: 0 30px 20px 30px;
+}
+
+.action-buttons button {
+  background-color: #0a66c2;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.content-card {
+  margin: 0 30px 20px 30px;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 10px;
+}
+
+.content-card h2, .content-card h3 {
+  margin-top: 0;
+}
+
+.content-card ul {
+  padding-left: 20px;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>afwanda rizqi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="profile-container">
+  <div class="header-bg"></div>
+
+  <div class="profile-photo-wrapper">
+    <img src="profile.png" alt="profile" class="profile-photo" />
+  </div>
+
+  <div class="header-text">
+    <h1>afwanda rizqi</h1>
+    <p class="subtitle">He/Him • Web Developer</p>
+    <p>Jakarta, Indonesia • <a href="https://afwanda.rizqi.id">afwanda.rizqi.com</a></p>
+    <p><strong>afwanda rizqi</strong> — Universitas ipwija</p>
+  </div>
+
+  <div class="action-buttons">
+
+
+    <button id="loginBtn">Login untuk akses data</button>
+<button id="logoutBtn">Logout</button>
+
+  </div>
+
+  <div id="content"></div>
+
+  <div class="content-card">
+    <h3>Sosial Media</h3>
+    <ul>
+      <li><strong>linkedin :</strong> http://linkedin.com/in/afwanda </li>
+      <li><strong>credly :</strong> https://www.credly.com/users/afwanda rizqi</li>
+    </ul>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const SUPABASE_URL = 'https://https://axdkczrtxnztgnwdsetj.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4ZGtjenJ0eG56dGdud2RzZXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1OTc4MDYsImV4cCI6MjA2MjE3MzgwNn0.8NzethwXofyC0bFXoH1FP1BaB7j8rk_v5WeBgkTzVcI'
+secret url = 'QhsG+7NEd035/FX1ICcLhVyiVjGfXlMIttuTwLMpoKRnVFw3E9bhOJFb80Q58WnoSOXmsqUCNyGsTkXSN92jbg=='
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const content = document.getElementById('content')
+
+// Coba login manual (bisa diganti pakai form)
+async function login() {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: 'user@example.com', // ganti dengan akun terdaftar
+    password: 'password123'     // ganti sesuai user
+  })
+
+  if (error) {
+    alert('Login gagal: ' + error.message)
+    return
+  }
+
+  loadData()
+}
+
+async function logout() {
+  await supabase.auth.signOut()
+  content.innerHTML = '<p>Logout berhasil.</p>'
+}
+
+// Load data hanya milik user yang login
+async function loadData() {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+
+    content.innerHTML = '<p>Silakan login untuk melihat data.</p>'
+    return
+  }
+
+
+
+
+  const { data, error } = await supabase
+    .from('web3')
+    .select('*')
+    .order('id')
+
+  if (error) {
+    alert('Error loading data: ' + error.message)
+    return
+  }
+
+  let out = ''
+  data.forEach(row => {
+    out += `
+      <div class="content-card">
+        <h2>${row.judul}</h2>
+        <p>${row.isi}</p>
+      </div>
+    `
+  })
+
+  content.innerHTML = out
+ content.innerHTML = in
+}
+
+
+document.getElementById('loginBtn').addEventListener('click', login)
+document.getElementById('logoutBtn').addEventListener('click', logout)
+
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) loadData()
+})
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CRUD Sederhana Supabase - manajemen bisnis online</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  #crudForm { display: none; border: 1px solid #ccc; padding: 15px; width: 300px; margin-top: 15px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  tr:hover { background-color: #f9f9f9; cursor: pointer; }
+  button { margin-right: 10px; }
+  #addBtn { margin-bottom: 15px; }
+</style>
+</head>
+<body>
+
+<h2>CRUD Sederhana dengan Supabase</h2>
+<button id="addBtn">Tambah</button>
+
+<table>
+  <thead>
+    <tr><th>ID</th><th>Judul</th><th>Isi</th></tr>
+  </thead>
+  <tbody id="dataBody"></tbody>
+</table>
+
+<form id="crudForm">
+  <input type="hidden" id="recordId" />
+  <div>
+    <label for="nameInput">Judul:</label><br/>
+    <input type="text" id="nameInput" required />
+  </div>
+  <div style="margin-top:8px;">
+    <label for="emailInput">Isi:</label><br/>
+    <textarea id="emailInput"> </textarea>
+    <!-- <input type="email" id="emailInput" required /> -->
+  </div>
+  <div style="margin-top:15px;">
+    <button type="submit">Simpan</button>
+    <button type="button" id="deleteBtn">Hapus</button>
+    <button type="button" id="cancelBtn">Batal</button>
+  </div>
+</form>
+
+<script type="module">
+// Import Supabase client dari CDN
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+
+const SUPABASE_URL = 'https://axdkczrtxnztgnwdsetj.supabase.co.
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4ZGtjenJ0eG56dGdud2RzZXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1OTc4MDYsImV4cCI6MjA2MjE3MzgwNn0.8NzethwXofyC0bFXoH1FP1BaB7j8rk_v5WeBgkTzVcI'
+
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// Elemen DOM
+const addBtn = document.getElementById('addBtn')
+const dataBody = document.getElementById('dataBody')
+const crudForm = document.getElementById('crudForm')
+const recordIdInput = document.getElementById('recordId')
+const nameInput = document.getElementById('nameInput')
+const emailInput = document.getElementById('emailInput')
+const deleteBtn = document.getElementById('deleteBtn')
+const cancelBtn = document.getElementById('cancelBtn')
+
+// Fungsi load data ke tabel
+async function loadData() {
+  const { data, error } = await supabase.from('web').select('*').order('id')
+  if (error) {
+    alert('Error loading data: ' + error.message)
+    return
+  }
+  dataBody.innerHTML = ''
+  data.forEach(row => {
+    const tr = document.createElement('tr')
+    tr.dataset.id = row.id
+    tr.innerHTML = `<td>${row.id}</td><td>${row.judul}</td><td>${row.isi}</td>`
+    tr.addEventListener('click', () => showForm(row))
+    dataBody.appendChild(tr)
+  })
+}
+
+// Tampilkan form, isi dengan data jika ada
+function showForm(data = null) {
+  if (data) {
+    recordIdInput.value = data.id
+    nameInput.value = data.judul
+    emailInput.value = data.isi
+    deleteBtn.style.display = 'inline-block'
+  } else {
+    recordIdInput.value = ''
+    crudForm.reset()
+    deleteBtn.style.display = 'none'
+  }
+  crudForm.style.display = 'block'
+  nameInput.focus()
+}
+
+// Sembunyikan form
+function hideForm() {
+  crudForm.style.display = 'none'
+  recordIdInput.value = ''
+  crudForm.reset()
+}
+
+// Simpan data (insert/update)
+async function saveData(e) {
+  e.preventDefault()
+  const id = recordIdInput.value
+  const judul = nameInput.value.trim()
+  const isi = emailInput.value.trim()
+
+  if (!judul || !isi) {
+    alert('Nama dan Email harus diisi!')
+    return
+  }
+
+  if (id) {
+    // Update
+    const { error } = await supabase.from('web').update({ judul, isi }).eq('id', id)
+    if (error) return alert('Error update: ' + error.message)
+  } else {
+    // Insert
+    const { error } = await supabase.from('web').insert([{ judul, isi }])
+    if (error) return alert('Error insert: ' + error.message)
+  }
+
+  hideForm()
+  loadData()
+}
+
+// Hapus data
+async function deleteData() {
+  const id = recordIdInput.value
+  if (!id) return
+  if (!confirm('Yakin ingin menghapus data ini?')) return
+
+  const { error } = await supabase.from('web').delete().eq('id', id)
+  if (error) return alert('Error hapus: ' + error.message)
+
+  hideForm()
+  loadData()
+}
+
+// Event listeners
+addBtn.addEventListener('click', () => showForm(null))
+crudForm.addEventListener('submit', saveData)
+deleteBtn.addEventListener('click', deleteData)
+cancelBtn.addEventListener('click', hideForm)
+
+// Load data saat halaman siap
+window.addEventListener('DOMContentLoaded', loadData)
+
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wawan Sismadi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="profile-container">
+  <div class="header-bg"></div>
+
+  <div class="profile-photo-wrapper">
+    <img src="profile.png" alt="profile" class="profile-photo" />
+  </div>
+
+  <div class="header-text">
+    <h1>afwanda rizqi</h1>
+    <p class="subtitle">He/Him • Web Developer</p>
+    <p>Jakarta, Indonesia • <a href="https://afwanda.rizqi.com"afwanda.rizqi.com/a></p>
+    <p><strong>afwanda rizqi</strong> — Universitas ipwija</p>
+  </div>
+
+  <div class="action-buttons">
+    <button>Open to work</button>
+    <button>Add profile section</button>
+    <button>Enhance profile</button>
+<a href='https://afwanda.github.io/pw/web/admin.html'> Admin </a>
+  </div>
+
+  <div id="content"  >
+
+
+  </div>
+
+
+
+  <div class="content-card">
+    <h3>Sosial Media <small></small></h3>
+    <ul>
+      <li><strong>linkedin :</strong> http://linkedin.com/in/afwanda </li>
+      <li><strong>credly :</strong> https://www.credly.com/users/afwanda rizqi</li>
+    </ul>
+  </div>
+</div>
+
+
+<script type="module">
+// Import Supabase client dari CDN
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+
+const SUPABASE_URL = 'https://axdkczrtxnztgnwdsetj.supabase.co'
+const SUPABASE_ANON_KEY =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4ZGtjenJ0eG56dGdud2RzZXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1OTc4MDYsImV4cCI6MjA2MjE3MzgwNn0.8NzethwXofyC0bFXoH1FP1BaB7j8rk_v5WeBgkTzVcI'
+
+secret services_role = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4ZGtjenJ0eG56dGdud2RzZXRqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjU5NzgwNiwiZXhwIjoyMDYyMTczODA2fQ.7r6qMZjT0swUv3OGdmQttQPYMXKADxxSfNkUo3NbgtU'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// Elemen DOM
+// const addBtn = document.getElementById('addBtn')
+// const dataBody = document.getElementById('dataBody')
+// const crudForm = document.getElementById('crudForm')
+// const recordIdInput = document.getElementById('recordId')
+// const nameInput = document.getElementById('nameInput')
+// const emailInput = document.getElementById('emailInput')
+// const deleteBtn = document.getElementById('deleteBtn')
+// const cancelBtn = document.getElementById('cancelBtn')
+
+const content = document.getElementById('content')
+
+// Fungsi load data ke tabel
+async function loadData() {
+  const { data, error } = await supabase.from('web').select('*').order('id')
+  if (error) {
+    alert('Error loading data: ' + error.message)
+    return
+  }
+  content.innerHTML = ''
+  let  out=``;
+  data.forEach(row => {
+
+    out+=`
+
+    <div class="content-card">
+    <h2>${row.judul}</h2>
+    <p>${row.isi}
+</p>
+
+  </div>
+  `
+
+  })
+  content.innerHTML = out
+
+
+}
+
+ // Load data saat halaman siap
+window.addEventListener('DOMContentLoaded', loadData)
+
+<section id="form" class="col-1-2">
+<form>
+<label>Username:</label><input type="text">
+<label>Password:</label><input type="password">
+<label>Warna:</label><input type="color">
+<label>Dropdown:</label>
+        <select>
+          <option>1</option>
+          <option>2</option>
+        </select>
+<input type="submit" value="cancel">
+        <button> login</button>
+      </form>
+    </section>
+
+    <section id="paragraf">
+<p>
+</script>
+
+
+
+</body>
+</htm
