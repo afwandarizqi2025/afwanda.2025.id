@@ -223,7 +223,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   <div class="header-bg"></div>
 
   <div class="profile-photo-wrapper">
-    <img src="profile.png" alt="profile" class="profile-photo" />
+    <img src="nametag lkm.jpg" alt="profile" class="profile-photo" />
   </div>
 
   <div class="header-text">
